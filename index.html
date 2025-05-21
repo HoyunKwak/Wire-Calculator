@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>전선 굵기 계산기</title>
+  <title>전선 규격 계산기</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -181,7 +181,7 @@
         }
       }
 
-      let html = `<b>계산된 전류:</b> ${current.toFixed(2)} A<br><br>`;
+      let html = `<b>계산된 전류:</b> ${current.toFixed(4)} A<br><br>`;
 
       if (selectedWire) {
         // 권장 거리 계산 (거리 역산)
