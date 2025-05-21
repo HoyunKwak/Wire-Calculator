@@ -2,197 +2,179 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>전선 규격 계산기</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --primary: #3498db;
-      --accent: #2ecc71;
-      --danger: #e74c3c;
-      --background: #f4f6f8;
-      --card: #fff;
-      --text: #333;
-    }
-
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: var(--background);
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 20px;
-      color: var(--text);
+      padding: 1rem;
+      background: #f8f9fa;
+      color: #212529;
     }
-
     .container {
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
-      background: var(--card);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
     }
-
-    h2 {
+    h1 {
       text-align: center;
-      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
     }
-
     label {
-      font-weight: 600;
       display: block;
-      margin-top: 15px;
+      margin: 0.5rem 0 0.2rem;
     }
-
-    input {
+    input, select {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      font-size: 15px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ced4da;
+      border-radius: 0.375rem;
     }
-
     button {
       width: 100%;
-      background: var(--primary);
+      padding: 0.75rem;
+      background: #0d6efd;
       color: white;
-      font-weight: bold;
-      padding: 12px;
       border: none;
-      border-radius: 10px;
-      margin-top: 20px;
-      font-size: 16px;
+      border-radius: 0.375rem;
+      font-size: 1rem;
       cursor: pointer;
     }
-
     button:hover {
-      background: #2980b9;
+      background: #0b5ed7;
     }
-
     .result {
-      margin-top: 25px;
-      padding: 15px;
-      background: #ecf0f1;
-      border-radius: 10px;
+      background: #e9ecef;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
     }
-
-    .success { color: var(--accent); font-weight: bold; }
-    .error { color: var(--danger); font-weight: bold; }
-    .note { font-size: 13px; color: #888; }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 15px;
-      }
-
-      h2 {
-        font-size: 20px;
-      }
+    .notice {
+      color: #d9534f;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.2rem; }
+      button { font-size: 0.9rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🔌 전선 규격 계산기</h2>
+    <h1>전선 규격 계산기</h1>
+    <p class="notice" id="inputNotice">⚠️ 전력(W) 또는 전류(A) 중 <strong>하나만 입력하세요</strong>. 둘 다 입력할 필요는 없습니다.</p>
+    <label for="voltage">전압 (V)</label>
+    <input type="number" id="voltage" placeholder="예: 12" />
 
-    <label>전력 (W)</label>
-    <input type="number" id="power" placeholder="예: 2000">
+    <label for="power">전력 (W)</label>
+    <input type="number" id="power" placeholder="예: 24" />
 
-    <label>또는 전류 (A)</label>
-    <input type="number" id="current" placeholder="예: 10">
+    <label for="current">전류 (A)</label>
+    <input type="number" id="current" placeholder="예: 2" />
 
-    <label>전압 (V)</label>
-    <input type="number" id="voltage" value="220">
+    <label for="length">전선 길이 (m, 왕복)</label>
+    <input type="number" id="length" placeholder="예: 10" />
 
-    <label>배선 거리 (편도, m)</label>
-    <input type="number" id="distance" value="10">
+    <label for="voltDrop">허용 전압강하 (%)</label>
+    <input type="number" id="voltDrop" value="3" />
 
-    <label>역률 (PF)</label>
-    <input type="number" step="0.01" id="pf" value="0.9">
+    <label><input type="checkbox" id="sensorMode" /> 센서 결선 모드 (초소형 전선 포함)</label>
 
-    <button onclick="calculate()">계산하기</button>
+    <button onclick="calculateWireSize()">계산하기</button>
 
     <div class="result" id="result"></div>
   </div>
 
   <script>
-    const resistivity = 0.0175; // 구리 기준 (Ω·mm²/m)
-    const maxVoltageDrop = 0.05; // 5%
-    
     const wireSizes = [
-  { mm2: 0.0127, awg: 36, diameter: 0.127 },
-  { mm2: 0.02, awg: 34, diameter: 0.16 },
-  { mm2: 0.03, awg: 32, diameter: 0.202 },
-  { mm2: 0.05, awg: 30, diameter: 0.255 },
-  { mm2: 0.08, awg: 28, diameter: 0.32 },
-  { mm2: 0.13, awg: 26, diameter: 0.405 },
-  { mm2: 0.2, awg: 24, diameter: 0.51 },
-  { mm2: 0.3, awg: 23, diameter: 0.57 },
-  { mm2: 0.5, awg: 20, diameter: 0.81 },
-  { mm2: 0.2, awg: 24, diameter: 0.51 },
-  { mm2: 0.3, awg: 23, diameter: 0.57 },
-  { mm2: 0.5, awg: 20, diameter: 0.81 },
-  { mm2: 0.75, awg: 18, diameter: 1.02 },
-  { mm2: 1.0, awg: 17, diameter: 1.13 },
-  { mm2: 1.25, awg: 16, diameter: 1.26 },
-  { mm2: 1.5, awg: 16, diameter: 1.38 },
-  { mm2: 2.5, awg: 14, diameter: 1.63 },
-  { mm2: 4, awg: 12, diameter: 2.05 },
-  { mm2: 6, awg: 10, diameter: 2.59 },
-  { mm2: 10, awg: 8, diameter: 3.26 },
-  { mm2: 16, awg: 6, diameter: 4.11 },
-  { mm2: 25, awg: 4, diameter: 5.19 },
-  { mm2: 35, awg: 2, diameter: 6.54 },
-  { mm2: 50, awg: 1, diameter: 7.35 },
-];
+      { mm2: 0.0020, awg: 44, diameter: 0.0508 },
+      { mm2: 0.0032, awg: 42, diameter: 0.0635 },
+      { mm2: 0.0050, awg: 40, diameter: 0.0799 },
+      { mm2: 0.0081, awg: 38, diameter: 0.1016 },
+      { mm2: 0.0127, awg: 36, diameter: 0.127 },
+      { mm2: 0.02, awg: 34, diameter: 0.16 },
+      { mm2: 0.03, awg: 32, diameter: 0.202 },
+      { mm2: 0.05, awg: 30, diameter: 0.255 },
+      { mm2: 0.08, awg: 28, diameter: 0.32 },
+      { mm2: 0.13, awg: 26, diameter: 0.405 },
+      { mm2: 0.2, awg: 24, diameter: 0.51 },
+      { mm2: 0.3, awg: 23, diameter: 0.57 },
+      { mm2: 0.5, awg: 20, diameter: 0.81 },
+      { mm2: 0.75, awg: 18, diameter: 1.02 },
+      { mm2: 1.0, awg: 17, diameter: 1.13 },
+      { mm2: 1.5, awg: 15, diameter: 1.45 },
+      { mm2: 2.5, awg: 13, diameter: 1.8 },
+      { mm2: 4.0, awg: 11, diameter: 2.2 },
+      { mm2: 6.0, awg: 9, diameter: 2.8 },
+      { mm2: 10.0, awg: 7, diameter: 3.6 },
+      { mm2: 16.0, awg: 5, diameter: 4.5 }
+    ];
 
-    function calculate() {
-      const power = parseFloat(document.getElementById('power').value);
-      const inputCurrent = parseFloat(document.getElementById('current').value);
+    const powerInput = document.getElementById('power');
+    const currentInput = document.getElementById('current');
+    const notice = document.getElementById('inputNotice');
+
+    powerInput.addEventListener('input', checkInputHint);
+    currentInput.addEventListener('input', checkInputHint);
+
+    function checkInputHint() {
+      if (powerInput.value && currentInput.value) {
+        notice.textContent = '⚠️ 전력과 전류 중 하나만 입력하세요!';
+      } else {
+        notice.textContent = '⚠️ 전력(W) 또는 전류(A) 중 하나만 입력하세요. 둘 다 입력할 필요는 없습니다.';
+      }
+    }
+
+    function calculateWireSize() {
       const voltage = parseFloat(document.getElementById('voltage').value);
-      const distance = parseFloat(document.getElementById('distance').value);
-      const pf = parseFloat(document.getElementById('pf').value);
-      const resultDiv = document.getElementById('result');
+      const power = parseFloat(document.getElementById('power').value);
+      let current = parseFloat(document.getElementById('current').value);
+      const length = parseFloat(document.getElementById('length').value);
+      const voltDrop = parseFloat(document.getElementById('voltDrop').value) / 100;
+      const sensorMode = document.getElementById('sensorMode').checked;
 
-      resultDiv.innerHTML = "";
-
-      let current = 0;
-
-      if (!isNaN(power) && !isNaN(inputCurrent)) {
-        resultDiv.innerHTML = `<div class="error">⚠️ 전력과 전류 중 하나만 입력하세요!</div>`;
+      if (!voltage || !length || isNaN(voltDrop)) {
+        document.getElementById('result').innerHTML = '<p>입력값을 확인해주세요.</p>';
         return;
       }
 
-      if (!isNaN(power)) {
-        current = power / (voltage * pf);
-      } else if (!isNaN(inputCurrent)) {
-        current = inputCurrent;
-      } else {
-        resultDiv.innerHTML = `<div class="error">⚠️ 전력 또는 전류 중 하나는 반드시 입력해야 합니다.</div>`;
-        return;
-      }
-
-      let selectedWire = null;
-
-      for (let wire of wireSizes) {
-        const voltageDrop = (2 * distance * current * resistivity) / wire.mm2;
-        if (voltageDrop / voltage <= maxVoltageDrop) {
-          selectedWire = wire;
-          break;
+      if (isNaN(current)) {
+        if (!power || voltage === 0) {
+          document.getElementById('result').innerHTML = '<p>전력 또는 전류를 입력해주세요.</p>';
+          return;
         }
+        current = power / voltage;
       }
 
-      let html = `<b>계산된 전류:</b> ${current.toFixed(4)} A<br><br>`;
+      const resistivity = 0.0175; // 구리 저항률 (Ohm·mm²/m)
+      const maxResistance = (voltage * voltDrop) / current;
 
-      if (selectedWire) {
-        // 권장 거리 계산 (거리 역산)
-        const maxDistance = (selectedWire.mm2 * maxVoltageDrop * voltage) / (2 * current * resistivity);
-        html += `<div class="success">✅ 추천 전선: ${selectedWire.mm2} mm² ≈ AWG ${selectedWire.awg} ≈ Ø ${selectedWire.diameter} mm</div>`;
-        html += `<div class="note">이 전선으로는 최대 약 <b>${Math.floor(maxDistance)} m</b>까지 허용 전압강하 5% 내 사용 가능</div>`;
+      let recommended = wireSizes.find(wire => {
+        const resistance = (resistivity * length) / wire.mm2;
+        return resistance <= maxResistance;
+      });
+
+      if (!sensorMode) {
+        // 일반 모드: 0.13mm² 이상만 허용
+        recommended = wireSizes.find(wire => wire.mm2 >= 0.13 && ((resistivity * length) / wire.mm2) <= maxResistance);
+      }
+
+      let resultText = `<p><strong>계산된 전류:</strong> ${current.toFixed(4)} A</p>`;
+
+      if (recommended) {
+        resultText += `<p><strong>권장 전선 굵기:</strong> ${recommended.mm2} mm² (AWG ${recommended.awg}, 지름 ${recommended.diameter.toFixed(3)} mm)</p>`;
       } else {
-        html += `<div class="error">⚠️ 전류가 너무 크거나 거리가 너무 깁니다. 50 mm² 이상 사용 권장</div>`;
+        resultText += '<p style="color:red;">조건에 맞는 전선이 없습니다. 전류를 줄이거나 길이를 줄여보세요.</p>';
       }
 
-      resultDiv.innerHTML = html;
+      document.getElementById('result').innerHTML = resultText;
     }
   </script>
 </body>
