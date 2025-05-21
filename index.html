@@ -119,16 +119,22 @@
     const maxVoltageDrop = 0.05; // 5%
     
     const wireSizes = [
-      { mm2: 1.5, awg: 16, diameter: 1.38 },
-      { mm2: 2.5, awg: 14, diameter: 1.63 },
-      { mm2: 4, awg: 12, diameter: 2.05 },
-      { mm2: 6, awg: 10, diameter: 2.59 },
-      { mm2: 10, awg: 8, diameter: 3.26 },
-      { mm2: 16, awg: 6, diameter: 4.11 },
-      { mm2: 25, awg: 4, diameter: 5.19 },
-      { mm2: 35, awg: 2, diameter: 6.54 },
-      { mm2: 50, awg: 1, diameter: 7.35 },
-    ];
+  { mm2: 0.2, awg: 24, diameter: 0.51 },
+  { mm2: 0.3, awg: 23, diameter: 0.57 },
+  { mm2: 0.5, awg: 20, diameter: 0.81 },
+  { mm2: 0.75, awg: 18, diameter: 1.02 },
+  { mm2: 1.0, awg: 17, diameter: 1.13 },
+  { mm2: 1.25, awg: 16, diameter: 1.26 },
+  { mm2: 1.5, awg: 16, diameter: 1.38 },
+  { mm2: 2.5, awg: 14, diameter: 1.63 },
+  { mm2: 4, awg: 12, diameter: 2.05 },
+  { mm2: 6, awg: 10, diameter: 2.59 },
+  { mm2: 10, awg: 8, diameter: 3.26 },
+  { mm2: 16, awg: 6, diameter: 4.11 },
+  { mm2: 25, awg: 4, diameter: 5.19 },
+  { mm2: 35, awg: 2, diameter: 6.54 },
+  { mm2: 50, awg: 1, diameter: 7.35 },
+];
 
     function calculate() {
       const power = parseFloat(document.getElementById('power').value);
