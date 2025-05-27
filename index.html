@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>전선 규격 계산기</title>
+  <title>전선 굵기 계산기</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -68,7 +68,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>전선 규격 계산기</h1>
+    <h1>전선 굵기 계산기</h1>
     <p class="notice" id="inputNotice">⚠️ 전력(W) 또는 전류(A) 중 <strong>하나만 입력하세요</strong>. 둘 다 입력할 필요는 없습니다.</p>
     <label for="voltage">전압 (V)</label>
     <input type="number" id="voltage" placeholder="예: 12" />
@@ -94,27 +94,40 @@
 
   <script>
     const wireSizes = [
-      { mm2: 0.0020, awg: 44, diameter: 0.0508 },
-      { mm2: 0.0032, awg: 42, diameter: 0.0635 },
-      { mm2: 0.0050, awg: 40, diameter: 0.0799 },
-      { mm2: 0.0081, awg: 38, diameter: 0.1016 },
-      { mm2: 0.0127, awg: 36, diameter: 0.127 },
-      { mm2: 0.02, awg: 34, diameter: 0.16 },
-      { mm2: 0.03, awg: 32, diameter: 0.202 },
-      { mm2: 0.05, awg: 30, diameter: 0.255 },
-      { mm2: 0.08, awg: 28, diameter: 0.32 },
-      { mm2: 0.13, awg: 26, diameter: 0.405 },
-      { mm2: 0.2, awg: 24, diameter: 0.51 },
-      { mm2: 0.3, awg: 23, diameter: 0.57 },
-      { mm2: 0.5, awg: 20, diameter: 0.81 },
-      { mm2: 0.75, awg: 18, diameter: 1.02 },
-      { mm2: 1.0, awg: 17, diameter: 1.13 },
-      { mm2: 1.5, awg: 15, diameter: 1.45 },
-      { mm2: 2.5, awg: 13, diameter: 1.8 },
-      { mm2: 4.0, awg: 11, diameter: 2.2 },
-      { mm2: 6.0, awg: 9, diameter: 2.8 },
-      { mm2: 10.0, awg: 7, diameter: 3.6 },
-      { mm2: 16.0, awg: 5, diameter: 4.5 }
+      { awg: "30", mm: 0.255, mm2: 0.0509, current: 0.147 },
+      { awg: "29", mm: 0.286, mm2: 0.0642, current: 0.212 },
+      { awg: "28", mm: 0.321, mm2: 0.0810, current: 0.213 },
+      { awg: "27", mm: 0.361, mm2: 0.102, current: 0.288 },
+      { awg: "26", mm: 0.405, mm2: 0.129, current: 0.378 },
+      { awg: "25", mm: 0.455, mm2: 0.162, current: 0.477 },
+      { awg: "24", mm: 0.511, mm2: 0.205, current: 0.588 },
+      { awg: "23", mm: 0.573, mm2: 0.258, current: 3 },
+      { awg: "22", mm: 0.644, mm2: 0.326, current: 3 },
+      { awg: "21", mm: 0.723, mm2: 0.410, current: 4.2 },
+      { awg: "20", mm: 0.812, mm2: 0.518, current: 4.5 },
+      { awg: "19", mm: 0.912, mm2: 0.653, current: 5.5 },
+      { awg: "18", mm: 1.02, mm2: 0.823, current: 7 },
+      { awg: "17", mm: 1.15, mm2: 1.04, current: 10 },
+      { awg: "16", mm: 1.29, mm2: 1.31, current: 12 },
+      { awg: "15", mm: 1.45, mm2: 1.65, current: 14 },
+      { awg: "14", mm: 1.63, mm2: 2.08, current: 18 },
+      { awg: "13", mm: 1.83, mm2: 2.62, current: 28 },
+      { awg: "12", mm: 2.05, mm2: 3.31, current: 35 },
+      { awg: "11", mm: 2.3, mm2: 4.17, current: 40 },
+      { awg: "10", mm: 2.59, mm2: 5.26, current: 48 },
+      { awg: "9", mm: 2.91, mm2: 6.63, current: 55 },
+      { awg: "8", mm: 3.26, mm2: 8.36, current: 62 },
+      { awg: "7", mm: 3.66, mm2: 10.5, current: 70 },
+      { awg: "6", mm: 4.11, mm2: 13.3, current: 81 },
+      { awg: "5", mm: 4.62, mm2: 16.8, current: 94 },
+      { awg: "4", mm: 5.19, mm2: 21.1, current: 107 },
+      { awg: "3", mm: 5.83, mm2: 26.7, current: 125 },
+      { awg: "2", mm: 6.54, mm2: 33.6, current: 139 },
+      { awg: "1", mm: 7.35, mm2: 42.4, current: 165 },
+      { awg: "1/0", mm: 8.25, mm2: 53.5, current: 175 },
+      { awg: "2/0", mm: 9.26, mm2: 67.4, current: 223 },
+      { awg: "3/0", mm: 10.4, mm2: 85.0, current: 240 },
+      { awg: "4/0", mm: 11.7, mm2: 107, current: 298 }
     ];
 
     const powerInput = document.getElementById('power');
@@ -138,7 +151,6 @@
       let current = parseFloat(document.getElementById('current').value);
       const length = parseFloat(document.getElementById('length').value);
       const voltDrop = parseFloat(document.getElementById('voltDrop').value) / 100;
-      const sensorMode = document.getElementById('sensorMode').checked;
 
       if (!voltage || !length || isNaN(voltDrop)) {
         document.getElementById('result').innerHTML = '<p>입력값을 확인해주세요.</p>';
@@ -156,20 +168,15 @@
       const resistivity = 0.0175; // 구리 저항률 (Ohm·mm²/m)
       const maxResistance = (voltage * voltDrop) / current;
 
-      let recommended = wireSizes.find(wire => {
+      const suitable = wireSizes.find(wire => {
         const resistance = (resistivity * length) / wire.mm2;
-        return resistance <= maxResistance;
+        return resistance <= maxResistance && wire.current >= current;
       });
-
-      if (!sensorMode) {
-        // 일반 모드: 0.13mm² 이상만 허용
-        recommended = wireSizes.find(wire => wire.mm2 >= 0.13 && ((resistivity * length) / wire.mm2) <= maxResistance);
-      }
 
       let resultText = `<p><strong>계산된 전류:</strong> ${current.toFixed(4)} A</p>`;
 
-      if (recommended) {
-        resultText += `<p><strong>권장 전선 굵기:</strong> ${recommended.mm2} mm² (AWG ${recommended.awg}, 지름 ${recommended.diameter.toFixed(3)} mm)</p>`;
+      if (suitable) {
+        resultText += `<p><strong>권장 전선 굵기:</strong> AWG ${suitable.awg} (전류 허용치: ${suitable.current} A)<br> ⮕ ${suitable.mm2} mm² / 지름 ${suitable.mm.toFixed(3)} mm</p>`;
       } else {
         resultText += '<p style="color:red;">조건에 맞는 전선이 없습니다. 전류를 줄이거나 길이를 줄여보세요.</p>';
       }
